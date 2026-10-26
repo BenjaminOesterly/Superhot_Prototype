@@ -3,33 +3,40 @@ using UnityEngine;
 public class EnemyShooter : MonoBehaviour
 {
     public GameObject bulletPrefab;
-    private Transform player;
+    public Transform firePoint;
+    public float fireRate = 2f;
 
-    private float shootTimer = 2f;
+    private Transform playerTransform;
+    private float nextFireTime;
 
     void Start()
     {
-        PlayerController foundPlayer = GameObject.FindFirstObjectByType<PlayerController>();
-        if (foundPlayer != null)
+        if (GameManager.Instance != null && GameManager.Instance.player != null)
         {
-            player = foundPlayer.transform;
+            playerTransform = GameManager.Instance.player.transform;
         }
+        nextFireTime = Time.time + fireRate;
     }
 
     void Update()
     {
-        if (player == null) return;
-
-        transform.LookAt(player);
-        shootTimer -= Time.deltaTime;
-
-        if (shootTimer <= 0f)
+        if (playerTransform != null)
         {
-            shootTimer = 2f;
+            transform.LookAt(playerTransform);
 
-            Vector3 spawnPos = transform.position + (transform.forward * 1.5f) + (Vector3.up * 0.5f);
+            if (Time.time >= nextFireTime)
+            {
+                Shoot();
+                nextFireTime = Time.time + fireRate;
+            }
+        }
+    }
 
-            Instantiate(bulletPrefab, spawnPos, transform.rotation);
+    void Shoot()
+    {
+        if (bulletPrefab != null && firePoint != null)
+        {
+            Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         }
     }
 }
